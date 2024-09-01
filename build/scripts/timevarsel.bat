@@ -13,8 +13,6 @@
 @rem See the License for the specific language governing permissions and
 @rem limitations under the License.
 @rem
-@rem SPDX-License-Identifier: Apache-2.0
-@rem
 
 @if "%DEBUG%"=="" @echo off
 @rem ##########################################################################
@@ -70,7 +68,7 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\timevarsel-1.0-SNAPSHOT.jar;%APP_HOME%\lib\kotlin-stdlib-1.9.24.jar;%APP_HOME%\lib\annotations-13.0.jar
+set CLASSPATH=%APP_HOME%\lib\timevarsel-1.0-SNAPSHOT.jar;%APP_HOME%\lib\kotlinx-serialization-core-jvm-1.6.0.jar;%APP_HOME%\lib\kotlinx-serialization-json-jvm-1.6.0.jar;%APP_HOME%\lib\ktor-client-cio-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-client-core-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-events-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-websocket-serialization-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-http-cio-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-serialization-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-websockets-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-http-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-network-tls-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-network-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-utils-jvm-2.0.0.jar;%APP_HOME%\lib\ktor-io-jvm-2.0.0.jar;%APP_HOME%\lib\kotlinx-coroutines-jdk8-1.6.0.jar;%APP_HOME%\lib\kotlinx-coroutines-core-jvm-1.6.0.jar;%APP_HOME%\lib\kotlinx-coroutines-slf4j-1.6.0.jar;%APP_HOME%\lib\kotlin-stdlib-jdk8-1.8.0.jar;%APP_HOME%\lib\kotlin-stdlib-jdk7-1.8.0.jar;%APP_HOME%\lib\kotlin-stdlib-1.9.24.jar;%APP_HOME%\lib\annotations-13.0.jar;%APP_HOME%\lib\slf4j-api-1.7.36.jar
 
 
 @rem Execute timevarsel
