@@ -38,17 +38,20 @@ class Vegvesen {
     }
 
     suspend fun getSectionId(regionId: Int, requestFunction: suspend (String) -> String): List<Section>{
+        println("I getSectionId med id $regionId")
       val url = "https://timebestilling-api.atlas.vegvesen.no/api/Timebestilling/getsectionswithservice/438/$regionId";
         val res = withContext(Dispatchers.IO){
             requestFunction(url)
         }
         val json = Json{ignoreUnknownKeys=true}
         val sections:List<Section> = json.decodeFromString(res)
+        println("retur er $sections")
         return sections
 
     }
 
     suspend fun getAvailDates(sectionId:Int, month:Int, year:Int, requestFunction: suspend (String) -> String): List<String>{
+        println("kommet inn i funksjonen")
         val url = "https://timebestilling-api.atlas.vegvesen.no/api/Timebestilling/getavailabledates?sectionId=$sectionId&serviceId=438&month=$month&year=$year"
         val res = withContext(Dispatchers.IO){
             requestFunction(url)
@@ -56,6 +59,7 @@ class Vegvesen {
         try {
             val json = Json { ignoreUnknownKeys = true }
             val dates: List<String> = json.decodeFromString(res)
+            println("returnerer datoer")
             return dates;
         }catch (e: SerializationException) {
             // Handle specific JSON parsing errors
@@ -112,5 +116,20 @@ class Vegvesen {
             println(section.name)
             println(list)
         }
+    }
+    suspend fun finnDatoer(sectionId: Int):List<String>{
+        val currentDate = LocalDate.now()
+        // Extract current month and year
+        val currentMonth = currentDate.monthValue
+        val currentYear = currentDate.year
+
+        // Calculate the next month and year
+        val nextMonthDate = currentDate.plusMonths(1)
+        val nextMonth = nextMonthDate.monthValue
+        val nextYear = nextMonthDate.year
+        val resm1 = getAvailDates(sectionId, month=currentMonth, year = currentYear, ::makeHttpRequest)
+        val resm2 = getAvailDates(sectionId, month=nextMonth, year = nextYear,::makeHttpRequest)
+        return resm1
+
     }
 }
