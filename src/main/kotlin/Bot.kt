@@ -5,8 +5,20 @@ import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.message
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.extensions.filters.Filter
+import java.io.FileInputStream
+import java.util.*
 
-class Bot (myApiKey: String) {
+fun loadProperties(fileName: String): Properties {
+    val properties = Properties()
+    FileInputStream(fileName).use { fileInput ->
+        properties.load(fileInput)
+    }
+    return properties
+}
+
+object Bot {
+    private val properties = loadProperties("gradle.properties")
+    private val myApiKey = properties.getProperty("telegram_api")
     private val bot: Bot;
     private val chatListe: MutableList<ChatId> = mutableListOf();
     init {

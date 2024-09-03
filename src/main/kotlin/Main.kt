@@ -20,21 +20,10 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.*
 import java.io.File
 
-fun loadProperties(fileName: String): Properties {
-    val properties = Properties()
-    FileInputStream(fileName).use { fileInput ->
-        properties.load(fileInput)
-    }
-    return properties
-}
 
 fun main() {
-    val properties = loadProperties("gradle.properties")
-    val myApiKey = properties.getProperty("telegram_api")
 
-    val bot: Bot = Bot(myApiKey)
-    bot.startBot()
-
+    val controller: Controller = Controller()
     val veg:Vegvesen =  Vegvesen()
 try{
     runBlocking {
