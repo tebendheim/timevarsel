@@ -9,5 +9,4 @@ class Controller (){
         veg  =  Vegvesen()
         bot.startBot()
     }
-    fun oppdater
 }
