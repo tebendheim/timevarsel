@@ -14,6 +14,7 @@ import kotlinx.serialization.SerializationException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.YearMonth
 
 
 class Vegvesen {
@@ -94,8 +95,22 @@ class Vegvesen {
 
     suspend fun finnAlleIRegion(regionId: Int){
         val sections: List<Section> = getSectionId(regionId, ::makeHttpRequest)
+        val currentDate = LocalDate.now()
+        // Extract current month and year
+        val currentMonth = currentDate.monthValue
+        val currentYear = currentDate.year
+
+        // Calculate the next month and year
+        val nextMonthDate = currentDate.plusMonths(1)
+        val nextMonth = nextMonthDate.monthValue
+        val nextYear = nextMonthDate.year
+        print(nextYear)
         sections.forEach{section ->
-            getAvailDates(section.id, month=9, year = 2024, ::makeHttpRequest)
+            val resm1 = getAvailDates(section.id, month=currentMonth, year = currentYear, ::makeHttpRequest)
+            val resm2 = getAvailDates(section.id, month=nextMonth, year=nextYear, ::makeHttpRequest )
+            val list = resm1 + resm2
+            println(section.name)
+            println(list)
         }
     }
 }

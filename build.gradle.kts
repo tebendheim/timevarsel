@@ -13,6 +13,9 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral() // Ensure mavenCentral() is included
     gradlePluginPortal()
+    maven("https://jitpack.io")
+
+
 }
 
 dependencies {
@@ -26,9 +29,17 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
     implementation("org.slf4j:slf4j-nop:2.0.0")
-
-
-
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.2.0")
+    implementation("io.ktor:ktor-server-core:2.3.0")
+    implementation("io.ktor:ktor-server-netty:2.3.0")
+    implementation("io.ktor:ktor-server-host-common:2.3.0")
+    implementation("io.ktor:ktor-server-sessions:2.3.0")
+    implementation("io.ktor:ktor-server-auth:2.3.0")
+    implementation("io.ktor:ktor-server-auth-jwt:2.3.0")
+    implementation("io.ktor:ktor-server-call-logging:2.3.0")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.0")
 
 
 
@@ -49,11 +60,6 @@ application {
     mainClass.set("MainKt")
 }
 
-
-
-dependencies {
-    testImplementation(kotlin("test"))
-}
 
 tasks.test {
     useJUnitPlatform()

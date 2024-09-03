@@ -30,19 +30,19 @@ class VegvesenTest {
         assertEquals(LocalTime.of(11, 0), result[0])  // Compare to LocalTime directly
     }
 //
-//    @Test
-//    fun `test getTimeSlots with empty response`() = runBlocking {
-//        val mockRequestFunction = mockk<suspend (String) -> String>()
-//        val emptyJsonResponse = """[]"""
-//
-//        coEvery { mockRequestFunction(any()) } returns emptyJsonResponse
-//
-//        val vegvesen = Vegvesen()
-//        val result = vegvesen.getAvailTimes(mockRequestFunction)
-//
-//        assertEquals(0, result?.size)
-//    }
-//
+    @Test
+    fun `test getTimeSlots with empty response`() = runBlocking {
+        val mockRequestFunction = mockk<suspend (String) -> String>()
+        val emptyJsonResponse = """[]"""
+
+        coEvery { mockRequestFunction(any()) } returns emptyJsonResponse
+
+        val vegvesen = Vegvesen()
+        val result = vegvesen.getAvailTimes(sectionId = 123, date = "2024-09-02", requestFunction = mockRequestFunction)
+
+        println(assertEquals(0, result.size))
+    }
+
 //    @Test
 //    fun `test getTimeSlots with malformed response`() = runBlocking {
 //        val mockRequestFunction = mockk<suspend (String) -> String>()
@@ -51,7 +51,7 @@ class VegvesenTest {
 //        coEvery { mockRequestFunction(any()) } returns malformedJsonResponse
 //
 //        val vegvesen = Vegvesen()
-//        val result = vegvesen.getAvailTimes(mockRequestFunction)
+//        val result = vegvesen.getAvailTimes(sectionId = 123, date = "2024-09-02", requestFunction = mockRequestFunction)
 //
 //        assertEquals(null, result)
 //    }

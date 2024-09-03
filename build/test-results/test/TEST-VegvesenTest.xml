@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="VegvesenTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2024-09-01T22:09:05" hostname="Tom-Elbins-MBP.home" time="0.85">
-  <properties/>
-  <testcase name="test getAvailTimes with valid response()" classname="VegvesenTest" time="0.85"/>
-  <system-out><![CDATA[[11:00]
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
