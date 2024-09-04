@@ -280,7 +280,7 @@ class Bot(kontroll:Controller) {
             val parts = data.split("|")
             val sectionId = parts[1]
             val user = User(callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
-            control.leggTilVarsel(chatId, callbackQuery, sectionId.toInt())
+            control.leggTilVarsel(chatId, user, sectionId.toInt())
 
             println("finner ledige tidspunkt")
             bot.sendMessage(chatId = chatId, text = "Ledige dager er: $dates")
