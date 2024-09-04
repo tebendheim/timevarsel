@@ -1,17 +1,20 @@
+import com.github.kotlintelegrambot.entities.CallbackQuery
+import com.github.kotlintelegrambot.entities.ChatId
+
 class Controller (){
     private val bot:Bot = Bot(this)
     private val veg:Vegvesen
     private val abonnenter:MutableList<Abonnent> = mutableListOf()
     private val res: MutableMap<Section, TimeSlot> = mutableMapOf()
     private val regAb: MutableMap<Section, Abonnent> = mutableMapOf()
-    private val regions: List<Region>
+    private var regions: MutableList<Region> = mutableListOf()
     init {
         veg  =  Vegvesen()
         bot.startBot()
-        regions = mutableListOf()
     }
 
-    fun oppdater(){
+    suspend fun oppdater(){
+
 
     }
     suspend fun getRegions():List<Region>{
@@ -24,10 +27,11 @@ class Controller (){
         return retur
     }
     suspend fun getAvailDates(sectionid: Int):List<String>{
-        println(sectionid)
-        return listOf("Test")
-//        val retur =  veg.finnDatoer(sectionid)
-//        println(retur)
-//        return retur
+        val retur =  veg.finnDatoer(sectionid)
+        println(retur)
+        return retur
+    }
+    fun leggTilVarsel(chatId: ChatId, user:User, sectionid: Int){
+
     }
 }
