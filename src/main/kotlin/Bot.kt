@@ -63,7 +63,6 @@ class Bot(kontroll:Controller) {
                         chatId = chatId,
                         text = "Hei min kjære! Nå har jeg laget en bot til deg <3 OPPDATERT."
                     )
-                    println(message)
 
                     // Handle the response from Telegram API
                     response.fold(ifSuccess = {
@@ -155,7 +154,6 @@ class Bot(kontroll:Controller) {
                 command("test") {
                     val regions = control.getRegions()
                     val inlineKeyboardMarkup = createDynamicKeyboard(regions)
-                    println("i Test")
                     bot.sendMessage(
                         chatId = ChatId.fromId(message.chat.id),
                         text = "Velg ett område:",
@@ -243,8 +241,6 @@ class Bot(kontroll:Controller) {
         try {
             val parts = data.split("|")
             val sectionId = parts[1]
-
-            println("i getDates med SectionId: $sectionId")
             val dates = control.getAvailDates(sectionId.toInt())
 //            bot.sendMessage(chatId = chatId, text="Ledige datoer er: $dates")
 //            bot.editMessageReplyMarkup(
@@ -281,8 +277,6 @@ class Bot(kontroll:Controller) {
             val sectionId = parts[1]
             val user = User(callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
             control.leggTilVarsel(chatId, user, sectionId.toInt())
-
-            println("finner ledige tidspunkt")
             bot.sendMessage(chatId = chatId, text = "Ledige dager er: $dates")
             bot.editMessageReplyMarkup(
                 chatId = chatId,
