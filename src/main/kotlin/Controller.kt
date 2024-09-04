@@ -1,6 +1,3 @@
-import com.github.kotlintelegrambot.entities.CallbackQuery
-import com.github.kotlintelegrambot.entities.ChatId
-
 class Controller (){
     private val bot:Bot = Bot(this)
     private val veg:Vegvesen
@@ -8,7 +5,7 @@ class Controller (){
     private val res: MutableMap<Section, TimeSlot> = mutableMapOf()
     private val regioner:MutableList<Region> = mutableListOf()
     private val sections: MutableMap<Long, Section> = mutableMapOf()
-    private val sectionDates:MutableMap<Section, List<String>> = mutableMapOf()
+    private val sectionDates:MutableMap<Section, MutableList<String>> = mutableMapOf()
 
     init {
         veg  =  Vegvesen()
@@ -28,34 +25,42 @@ class Controller (){
         regioner.forEach{ region ->
             val allSections = getSections(region.id)
             val newSections = getNewItems(allSections, sections.values.toList())
-            newSections.forEach{section -> sections.put(section.id.toLong(), section)}
+            newSections.forEach{section -> sections.put(section.id, section)}
             val deletedSections = getDeletedItems(allSections, sections.values.toList())
-            deletedSections.forEach{section -> sections.remove(section.id.toLong())}
+            deletedSections.forEach{section -> sections.remove(section.id)}
                 allSections.forEach{section ->
                 val dates: List<String> = getAvailDates(section.id)
-                    val newDates = getNewItems(dates, sectionDates[section])
+                    val oldDates = sectionDates[section]
+                    val newDates = getNewItems(dates, oldDates)
                     val deletedDates = getDeletedItems(dates, sectionDates[section])
+                    addDates(newDates, section)
+                    deleteDates(deletedDates, section)
                     if (newDates.isNotEmpty()){
                         if (!init) {
 //                        @todo: Send message- new dates available with all dates and section
-                            val users = abonnenter[section.id]
+                            abonnenter[section.id]?.forEach { user ->
+                                bot.sendMessage(
+                                    user.chatId,
+                                    "${section.name} har nå Fått følgende nye datoer:\n ${dates.joinToString("\n")}"
+                                )
+                            }
+                            println("Section: $section har nye datoer: $newDates")
                         }
-                        sectionDates.replace(section, dates)
-                    }else if (deletedDates.isNotEmpty()){
-                        sectionDates.replace(section, dates)
                     }
             }
         }
-
-
-//        // Clear the current list and add all elements from the new list
-//
-//        regions.forEach{region ->
-//            getSections(region.id).forEach{section -> sections[]}
-//    }
-
-
-
+    }
+    fun addDates(dates:List<String>, section: Section){
+        val storedDates = sectionDates.get(section)
+        if (storedDates == null){
+            sectionDates.put(section, dates.toMutableList())
+        }
+        dates.forEach{date -> storedDates?.add(date)}
+    }
+    fun deleteDates(dates: List<String>, section: Section){
+        dates.forEach{
+            date -> sectionDates[section]?.remove(date)
+        }
     }
     suspend fun getRegions():List<Region>{
         return veg.getRegions(::makeHttpRequest)
@@ -91,7 +96,8 @@ fun <E> getNewItems(newList: List<E>, oldList: List<E>?):List<E>{
     if (oldList != null) {
         val oldSet = oldList.toSet()
         val newSet = newList.toSet()
-        return (newSet - oldSet).toList()
+        val res = (newSet - oldSet).toList()
+        return res
     }
     return newList
 }
