@@ -3,7 +3,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Region(
-    @SerialName("regionId") val id: Int,
+    @SerialName("regionId") val id: Long,
     @SerialName("regionName") val name: String,
-    val sections:MutableList<Section>
 )

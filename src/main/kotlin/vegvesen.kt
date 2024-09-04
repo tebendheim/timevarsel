@@ -25,10 +25,8 @@ class Vegvesen {
             val res = withContext(Dispatchers.IO) {
                 requestFunction("https://timebestilling-api.atlas.vegvesen.no/api/Timebestilling/getregions")
             }
-//            println("response: $res")
             val json = Json { ignoreUnknownKeys = true }
             val regions: List<Region> = json.decodeFromString(res)
-            regions.forEach { println(it) }
             return regions;
         }catch (e: Exception) {
             println("An error occurred: ${e.message}")
@@ -37,21 +35,18 @@ class Vegvesen {
         }
     }
 
-    suspend fun getSectionId(regionId: Int, requestFunction: suspend (String) -> String): List<Section>{
-        println("I getSectionId med id $regionId")
+    suspend fun getSectionId(regionId: Long, requestFunction: suspend (String) -> String): List<Section>{
       val url = "https://timebestilling-api.atlas.vegvesen.no/api/Timebestilling/getsectionswithservice/438/$regionId";
         val res = withContext(Dispatchers.IO){
             requestFunction(url)
         }
         val json = Json{ignoreUnknownKeys=true}
         val sections:List<Section> = json.decodeFromString(res)
-        println("retur er $sections")
         return sections
 
     }
 
-    suspend fun getAvailDates(sectionId:Int, month:Int, year:Int, requestFunction: suspend (String) -> String): List<String>{
-        println("kommet inn i funksjonen")
+    suspend fun getAvailDates(sectionId:Long, month:Int, year:Int, requestFunction: suspend (String) -> String): List<String>{
         val url = "https://timebestilling-api.atlas.vegvesen.no/api/Timebestilling/getavailabledates?sectionId=$sectionId&serviceId=438&month=$month&year=$year"
         val res = withContext(Dispatchers.IO){
             requestFunction(url)
@@ -59,7 +54,6 @@ class Vegvesen {
         try {
             val json = Json { ignoreUnknownKeys = true }
             val dates: List<String> = json.decodeFromString(res)
-            println("returnerer datoer")
             return dates;
         }catch (e: SerializationException) {
             // Handle specific JSON parsing errors
@@ -68,7 +62,7 @@ class Vegvesen {
         }
     }
 
-    suspend fun getAvailTimes(sectionId:Int, date:String, requestFunction: suspend (String) -> String):List<LocalTime> {
+    suspend fun getAvailTimes(sectionId:Long, date:String, requestFunction: suspend (String) -> String):List<LocalTime> {
         val url =
             "https://timebestilling-api.atlas.vegvesen.no/api/Timebestilling/booking/getavailabletime?sectionId=$sectionId&serviceId=438&fromDate=$date"
         val res = withContext(Dispatchers.IO) {
@@ -97,7 +91,7 @@ class Vegvesen {
     }
 
 
-    suspend fun finnAlleIRegion(regionId: Int){
+    suspend fun finnAlleIRegion(regionId: Long){
         val sections: List<Section> = getSectionId(regionId, ::makeHttpRequest)
         val currentDate = LocalDate.now()
         // Extract current month and year
@@ -117,7 +111,7 @@ class Vegvesen {
             println(list)
         }
     }
-    suspend fun finnDatoer(sectionId: Int):List<String>{
+    suspend fun finnDatoer(sectionId: Long):List<String>{
         val currentDate = LocalDate.now()
         // Extract current month and year
         val currentMonth = currentDate.monthValue

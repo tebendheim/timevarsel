@@ -224,7 +224,7 @@ class Bot(kontroll:Controller) {
             val parts = data.split("|")
             val regionId = parts[1].toInt()
             // Perform operations in IO context
-                val sections = control.getSections(regionId)
+                val sections = control.getSections(regionId.toLong())
                 val followUpKeyboard = createFollowUpKeyboard(sections)
                 bot.sendMessage(
                     chatId = chatId,
@@ -241,7 +241,7 @@ class Bot(kontroll:Controller) {
         try {
             val parts = data.split("|")
             val sectionId = parts[1]
-            val dates = control.getAvailDates(sectionId.toInt())
+            val dates = control.getAvailDates(sectionId.toLong())
 //            bot.sendMessage(chatId = chatId, text="Ledige datoer er: $dates")
 //            bot.editMessageReplyMarkup(
             bot.sendMessage(
@@ -276,7 +276,7 @@ class Bot(kontroll:Controller) {
             val parts = data.split("|")
             val sectionId = parts[1]
             val user = User(chatId, callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
-            val res = control.leggTilVarsel(user, sectionId.toInt())
+            val res = control.leggTilVarsel(user, sectionId.toLong())
             if (res.equals("error")){
                 bot.sendMessage(chatId = chatId, text = "Kunne ikke legge deg til som abonnent. Venligst prøv igjen senere.")
             }else{

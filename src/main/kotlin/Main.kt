@@ -26,28 +26,15 @@ fun main() {
     val controller: Controller = Controller()
     val veg:Vegvesen =  Vegvesen()
 try{
-    runBlocking {
-//        val res = veg.getRegions(::makeHttpRequest)
-//        println("response: $res")
-//        println("dette er en testprint")
-        val section = veg.getSectionId(173, ::makeHttpRequest)
-        println("sections: $section")
-//        val dates = veg.getAvailDates(1693, 9,2024, ::makeHttpRequest)
-//        println("dates: $dates")
-//        val times = veg.getAvailTimes(1693, "2024-09-02", ::makeHttpRequest)
-//        println("Times: $times")
-//        val alt = veg.finnAlleIRegion(172)
 
+    runBlocking {
         CoroutineScope(Dispatchers.IO).launch {
+            controller.oppdater(true)
             while (true) {
-                delay(600_0) // 10 minutes in milliseconds
-//                    println("nå skal det gå en melding")
+                delay(600_0) // 600_000 10 minutes in milliseconds
+                    controller.oppdater(false)
             }
         }
-
-
-
-
     }
     }catch (e: Exception) {
         println("An error occurred: ${e.message}")
