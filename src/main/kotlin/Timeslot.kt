@@ -19,8 +19,7 @@ data class TimeSlot(
     @Serializable(with = LocalDateTimeSerializer::class)
     val toDateTime: LocalDateTime
 )
-
-@Serializer(forClass = LocalDateTime::class)
+@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 

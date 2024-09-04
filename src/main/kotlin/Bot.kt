@@ -3,15 +3,14 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.command
-import com.github.kotlintelegrambot.dispatcher.inlineQuery
 import com.github.kotlintelegrambot.dispatcher.message
 import com.github.kotlintelegrambot.entities.CallbackQuery
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
+import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
-import kotlinx.coroutines.*
-import okhttp3.internal.wait
+import com.github.kotlintelegrambot.types.TelegramBotResult
 import java.io.FileInputStream
 import java.util.*
 
@@ -59,7 +58,7 @@ class Bot(kontroll:Controller) {
 //                 Handle the "/start" command
                 command("start") {
                     val chatId = ChatId.fromId(message.chat.id)
-                    val response = bot.sendMessage(
+                    val response:TelegramBotResult<Message> = bot.sendMessage(
                         chatId = chatId,
                         text = "Hei min kjære! Nå har jeg laget en bot til deg <3 OPPDATERT."
                     )
@@ -78,7 +77,7 @@ class Bot(kontroll:Controller) {
                 // Handle the "/help" command
                 command("help") {
                     val chatId = ChatId.fromId(message.chat.id)
-                    val response = bot.sendMessage(chatId = chatId, text = "This is a help message!")
+                    val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "This is a help message!")
 
                     response.fold(
                         ifSuccess = {
@@ -91,7 +90,7 @@ class Bot(kontroll:Controller) {
                 }
                 command("varsling") {
                     val chatId = ChatId.fromId(message.chat.id)
-                    val response = bot.sendMessage(chatId = chatId, text = "Nå setter jeg deg opp for varsling.")
+                    val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "Nå setter jeg deg opp for varsling.")
                     chatListe.add(chatId);
 
                     response.fold(
@@ -107,7 +106,7 @@ class Bot(kontroll:Controller) {
 
                 command("hei") {
                     val chatId = ChatId.fromId(message.chat.id)
-                    val response = bot.sendMessage(chatId = chatId, text = "Halla")
+                    val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "Halla")
 
                     response.fold(
                         ifSuccess = {
@@ -127,7 +126,7 @@ class Bot(kontroll:Controller) {
                     } else {
 
                         val chatId = ChatId.fromId(message.chat.id)
-                        val response = bot.sendMessage(chatId = chatId, text = "You said: ${message.text}")
+                        val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "You said: ${message.text}")
 
                         response.fold(
                             ifSuccess = { println("Echo message sent successfully") },
@@ -207,7 +206,7 @@ class Bot(kontroll:Controller) {
     }
 
     fun sendMessage(messageId: ChatId, message: String) {
-        val response = bot.sendMessage(chatId = messageId, text = message)
+        val response:TelegramBotResult<Message> = bot.sendMessage(chatId = messageId, text = message)
 
         response.fold(
             ifSuccess = {
