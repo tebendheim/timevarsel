@@ -4,21 +4,40 @@ import com.github.kotlintelegrambot.entities.ChatId
 class Controller (){
     private val bot:Bot = Bot(this)
     private val veg:Vegvesen
-    private val abonnenter:MutableList<Abonnent> = mutableListOf()
+    private val abonnenter:MutableMap<Section, User> = mutableMapOf()
     private val res: MutableMap<Section, TimeSlot> = mutableMapOf()
-    private val regAb: MutableMap<Section, Abonnent> = mutableMapOf()
-    private val regions: MutableList<Region> = mutableListOf()
+    private val regioner:MutableList<Region> = mutableListOf()
+    private val sections: MutableMap<Long, Section> = mutableMapOf()
+
     init {
         veg  =  Vegvesen()
         bot.startBot()
     }
 
-    suspend fun oppdater(){
+    suspend fun oppdater() {
         val newRegions: List<Region> = getRegions()
+        regioner.clear()
+        regioner.addAll(newRegions)
 
-        // Clear the current list and add all elements from the new list
-        regions.clear()
-        regions.addAll(newRegions)
+//        @todo: For hver region. søke opp seksjoner. og sjekke om de er like eller ulike, og deretter sjekke datoer på seksjonen
+//        @todo: Deretter Sjekke abon på secsjonen og sende melding.
+//        @todo: Deretter gå videre til neste seksjon - for så neste region osv.
+
+        regioner.forEach{ region ->
+            getSections(region.id).forEach{section ->
+                val dates: List<String> = getAvailDates(section.id)
+
+            }
+        }
+
+
+//        // Clear the current list and add all elements from the new list
+//
+//        regions.forEach{region ->
+//            getSections(region.id).forEach{section -> sections[]}
+//    }
+
+
 
     }
     suspend fun getRegions():List<Region>{
@@ -35,8 +54,16 @@ class Controller (){
         println(retur)
         return retur
     }
-    fun leggTilVarsel(chatId: ChatId, user:User, sectionid: Int){
-
+    fun leggTilVarsel(user:User, sectionid: Int): String{
+        val section = sections[sectionid.toLong()]
+        if (section != null){
+            abonnenter.put(section, user )
+            return "success"
+        }
+        else{
+            println("Noe feil med å legge til abonnemnet.")
+            return "error"
+        }
     }
 
     fun compareLists(oldList: List<Region>, newList: List<Region>) {

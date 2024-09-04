@@ -1,4 +1,7 @@
+import com.github.kotlintelegrambot.entities.ChatId
+
 data class User(
+    val chatId: ChatId,
     val id: Long,
     val isBot: Boolean,
     val firstName: String,

@@ -275,9 +275,13 @@ class Bot(kontroll:Controller) {
             val dates = control.getSections(173)
             val parts = data.split("|")
             val sectionId = parts[1]
-            val user = User(callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
-            control.leggTilVarsel(chatId, user, sectionId.toInt())
-            bot.sendMessage(chatId = chatId, text = "Ledige dager er: $dates")
+            val user = User(chatId, callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
+            val res = control.leggTilVarsel(user, sectionId.toInt())
+            if (res.equals("error")){
+                bot.sendMessage(chatId = chatId, text = "Kunne ikke legge deg til som abonnent. Venligst prøv igjen senere.")
+            }else{
+                bot.sendMessage(chatId = chatId, text = "Du vil få varslinger på denne trafikkstasjonen")
+            }
             bot.editMessageReplyMarkup(
                 chatId = chatId,
                 messageId = callbackQuery.message?.messageId,
