@@ -1,6 +1,7 @@
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatch
+import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.message
@@ -11,6 +12,7 @@ import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.types.TelegramBotResult
+import io.ktor.server.engine.*
 import java.io.FileInputStream
 import java.util.*
 
@@ -47,37 +49,40 @@ fun createFollowUpKeyboard(options: List<Section>): InlineKeyboardMarkup {
 class Bot(kontroll:Controller) {
     private val control = kontroll
 
-    private val bot: Bot;
+    private val myBot: Bot
     private val chatListe: MutableList<ChatId> = mutableListOf();
 
     init {
-
         val properties = loadProperties("gradle.properties")
         val myApiKey = properties.getProperty("telegram_api")
-        bot = bot {
-            token = myApiKey
-            dispatch {
-//                 Handle the "/start" command
-                command("start") {
-                    val chatId = ChatId.fromId(message.chat.id)
-                    val response:TelegramBotResult<Message> = bot.sendMessage(
-                        chatId = chatId,
-                        text = "Hei min kjære! Nå har jeg laget en bot til deg <3 OPPDATERT."
-                    )
+        myBot = bot{token = myApiKey?: System.getenv("TELEGRAM_API_KEY")
+        dispatch { dispatchSetup(this) }
+        }
+    }
 
-                    // Handle the response from Telegram API
-                    response.fold(ifSuccess = {
-                        println("Message sent successfully")
-                    },
-                        ifError = {
-                            println("Failed to send message: ${message}")
-                        }
-                    )
+    private fun dispatchSetup(dispatcher: Dispatcher):Unit {
+        dispatcher.command("start") {
+//                 Handle the "/start" command
+            val chatId = ChatId.fromId(message.chat.id)
+            val response: TelegramBotResult<Message> = bot.sendMessage(
+                chatId = chatId,
+                text = "Hei min kjære! Nå har jeg laget en bot til deg <3 OPPDATERT."
+            )
+
+            // Handle the response from Telegram API
+            response.fold(ifSuccess = {
+                println("Message sent successfully")
+            },
+                ifError = {
+                    println("Failed to send message: ${message}")
                 }
+            )
+        }
+
 
 
                 // Handle the "/help" command
-                command("help") {
+                dispatcher.command("help") {
                     val chatId = ChatId.fromId(message.chat.id)
                     val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "This is a help message!")
 
@@ -90,7 +95,8 @@ class Bot(kontroll:Controller) {
                         }
                     )
                 }
-                command("varsling") {
+
+                dispatcher.command("varsling") {
                     val chatId = ChatId.fromId(message.chat.id)
                     val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "Nå setter jeg deg opp for varsling.")
                     chatListe.add(chatId);
@@ -106,7 +112,7 @@ class Bot(kontroll:Controller) {
                     )
                 }
 
-                command("hei") {
+                dispatcher.command("hei") {
                     val chatId = ChatId.fromId(message.chat.id)
                     val response:TelegramBotResult<Message> = bot.sendMessage(chatId = chatId, text = "Halla")
 
@@ -120,7 +126,7 @@ class Bot(kontroll:Controller) {
                     )
                 }
 
-                message(Filter.Text) {
+                dispatcher.message(Filter.Text) {
                     // Check if the message is a command or something else
                     if (message.text?.startsWith("/") == true) {
                         // This is a command, ignore it here
@@ -136,7 +142,7 @@ class Bot(kontroll:Controller) {
                         )
                     }
                 }
-                command("test1") {
+                dispatcher.command("test1") {
                     val inlineKeyboardMarkup = InlineKeyboardMarkup.create(
                         listOf(
                             InlineKeyboardButton.CallbackData(
@@ -152,7 +158,7 @@ class Bot(kontroll:Controller) {
                         replyMarkup = inlineKeyboardMarkup,
                     )
                 }
-                command("test") {
+                dispatcher.command("test") {
                     val regions = control.getRegions()
                     val inlineKeyboardMarkup = createDynamicKeyboard(regions)
                     bot.sendMessage(
@@ -163,11 +169,11 @@ class Bot(kontroll:Controller) {
                 }
 
 
-                callbackQuery("testButton") {
+                dispatcher.callbackQuery("testButton") {
                     val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                     bot.sendMessage(ChatId.fromId(chatId), callbackQuery.data)
                 }
-                callbackQuery {
+                dispatcher.callbackQuery {
                     val chatId = ChatId.fromId(callbackQuery.message?.chat?.id ?: return@callbackQuery)
                     val data = callbackQuery.data
 
@@ -194,21 +200,18 @@ class Bot(kontroll:Controller) {
                     }
                 }
             }
-        }
-    }
-
 
 
     fun startBot() {
-        bot.startPolling()
+        myBot.startPolling()
     }
 
     fun stopBot() {
-        bot.stopPolling()
+        myBot.stopPolling()
     }
 
     fun sendMessage(messageId: ChatId, message: String) {
-        val response:TelegramBotResult<Message> = bot.sendMessage(chatId = messageId, text = message)
+        val response:TelegramBotResult<Message> = myBot.sendMessage(chatId = messageId, text = message)
 
         response.fold(
             ifSuccess = {
@@ -227,7 +230,7 @@ class Bot(kontroll:Controller) {
             // Perform operations in IO context
                 val sections = control.getSections(regionId.toLong())
                 val followUpKeyboard = createFollowUpKeyboard(sections)
-                bot.sendMessage(
+            myBot.sendMessage(
                     chatId = chatId,
                     text = "Velg ett sted: ",
                     replyMarkup = followUpKeyboard
@@ -245,7 +248,7 @@ class Bot(kontroll:Controller) {
             val dates = control.getAvailDates(sectionId.toLong())
 //            bot.sendMessage(chatId = chatId, text="Ledige datoer er: $dates")
 //            bot.editMessageReplyMarkup(
-            bot.sendMessage(
+            myBot.sendMessage(
                 chatId = chatId,
 //                messageId = callbackQuery.message?.messageId,
                 text =  if (dates.isEmpty()) {
@@ -279,11 +282,11 @@ class Bot(kontroll:Controller) {
             val user = User(chatId, callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
             val res = control.leggTilVarsel(user, sectionId.toLong())
             if (res.equals("error")){
-                bot.sendMessage(chatId = chatId, text = "Kunne ikke legge deg til som abonnent. Venligst prøv igjen senere.")
+                myBot.sendMessage(chatId = chatId, text = "Kunne ikke legge deg til som abonnent. Venligst prøv igjen senere.")
             }else{
-                bot.sendMessage(chatId = chatId, text = "Du vil få varslinger på denne trafikkstasjonen")
+                myBot.sendMessage(chatId = chatId, text = "Du vil få varslinger på denne trafikkstasjonen")
             }
-            bot.editMessageReplyMarkup(
+            myBot.editMessageReplyMarkup(
                 chatId = chatId,
                 messageId = callbackQuery.message?.messageId,
                 replyMarkup = null
@@ -297,7 +300,7 @@ class Bot(kontroll:Controller) {
         try {
             val regions = control.getRegions()
             val inlineKeyboardMarkup = createDynamicKeyboard(regions)
-            bot.editMessageReplyMarkup(
+            myBot.editMessageReplyMarkup(
                 chatId = chatId,
                 messageId = callbackQuery.message?.messageId,
                 replyMarkup = inlineKeyboardMarkup
@@ -309,12 +312,12 @@ class Bot(kontroll:Controller) {
 
     private suspend fun handleExitActionCallback(chatId: ChatId, callbackQuery: CallbackQuery) {
         try {
-            bot.editMessageReplyMarkup(
+            myBot.editMessageReplyMarkup(
                 chatId = chatId,
                 messageId = callbackQuery.message?.messageId ?: return,
                 replyMarkup = null // Remove the keyboard
             )
-            bot.sendMessage(chatId, text = "You have exited the menu.")
+            myBot.sendMessage(chatId, text = "You have exited the menu.")
         } catch (e: Exception) {
             println("Error processing exit action callback: ${e.message}")
         }
