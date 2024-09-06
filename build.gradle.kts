@@ -8,7 +8,7 @@ plugins {
 
 
 group = "me.user"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     mavenCentral() // Ensure mavenCentral() is included
@@ -49,16 +49,29 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = "19" // Use Java 21
-    targetCompatibility = "19" // Use Java 21
+    sourceCompatibility = "19" //
+    targetCompatibility = "19" // Use Java 19
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "19" // Use Java 21
+    kotlinOptions.jvmTarget = "19" // Use Java 19
 }
 
 application {
     mainClass.set("MainKt")
+}
+
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+            "Main-Class" to "MainKt" // Replace with your main class (fully qualified class name)
+        )
+    }
+    // Ensure all Kotlin compiled classes are included in the JAR
+        from({
+            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+        })
 }
 
 

@@ -46,12 +46,14 @@ fun createFollowUpKeyboard(options: List<Section>): InlineKeyboardMarkup {
 
 class Bot(kontroll:Controller) {
     private val control = kontroll
-    private val properties = loadProperties("gradle.properties")
-    private val myApiKey = properties.getProperty("telegram_api")
+
     private val bot: Bot;
     private val chatListe: MutableList<ChatId> = mutableListOf();
 
     init {
+
+        val properties = loadProperties("gradle.properties")
+        val myApiKey = properties.getProperty("telegram_api")
         bot = bot {
             token = myApiKey
             dispatch {
