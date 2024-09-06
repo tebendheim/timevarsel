@@ -19,12 +19,16 @@ import java.util.*
 
 
 
-fun loadProperties(fileName: String): Properties {
-    val properties = Properties()
-    FileInputStream(fileName).use { fileInput ->
-        properties.load(fileInput)
+fun loadProperties(fileName: String): Properties? {
+    try {
+        val properties = Properties()
+        FileInputStream(fileName).use { fileInput ->
+            properties.load(fileInput)
+        }
+        return properties
+    }catch(e:Exception){
+        return null
     }
-    return properties
 }
 
 
@@ -54,7 +58,7 @@ class Bot(kontroll:Controller) {
 
     init {
         val properties = loadProperties("gradle.properties")
-        val myApiKey = properties.getProperty("telegram_api")
+        val myApiKey = properties?.getProperty("telegram_api")
         myBot = bot{token = myApiKey?: System.getenv("TELEGRAM_API_KEY")
         dispatch { dispatchSetup(this) }
         }
