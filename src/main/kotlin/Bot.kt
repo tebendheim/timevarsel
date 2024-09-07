@@ -59,7 +59,7 @@ class Bot(kontroll:Controller) {
     init {
         val properties = loadProperties("gradle.properties")
         val myApiKey = properties?.getProperty("telegram_api")
-        myBot = bot{token = myApiKey?: System.getenv("TELEGRAM_API_KEY")
+        myBot = bot{token = myApiKey?: System.getenv("telegram_api")
         dispatch { dispatchSetup(this) }
         }
     }
