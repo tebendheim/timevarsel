@@ -24,5 +24,5 @@ RUN ./gradlew build --no-daemon
 RUN ls -l build/libs/
 
 # Define the command to run the application
-CMD ["sh", "-c", "java -jar build/libs/timevarsel-1.0.jar || sleep infinity"]
+CMD ["sh", "-c", "java -jar build/libs/timevarsel-1.0.jar"]
 

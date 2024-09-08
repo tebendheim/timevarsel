@@ -13,7 +13,7 @@ try{
         CoroutineScope(Dispatchers.IO).launch {
             controller.oppdater(true)
             while (true) {
-                delay(600_0) // 600_000 10 minutes in milliseconds
+                delay(300_000) // 600_000 10 minutes in milliseconds
                     controller.oppdater(false)
             }
         }
