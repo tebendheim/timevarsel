@@ -11,10 +11,10 @@ try{
 
     runBlocking {
         CoroutineScope(Dispatchers.IO).launch {
-            controller.oppdater(true)
+            controller.start()
             while (true) {
                 delay(300_000) // 600_000 10 minutes in milliseconds
-                    controller.oppdater(false)
+                    controller.oppdater()
             }
         }
     }

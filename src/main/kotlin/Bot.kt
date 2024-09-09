@@ -51,7 +51,7 @@ fun createFollowUpKeyboard(options: List<Section>): InlineKeyboardMarkup {
 }
 
 fun createSubsList(options: List<Section>): InlineKeyboardMarkup{
-    val sectionButtons = options.map {option -> InlineKeyboardButton.CallbackData(text=option.name, callbackData = "fjern|$option.id")}
+    val sectionButtons = options.map {option -> InlineKeyboardButton.CallbackData(text=option.name, callbackData = "Slett|$option.id")}
     val additionalButton = listOf( InlineKeyboardButton.CallbackData(text = "Back", callbackData = "exitAction"))
     val buttons = sectionButtons + additionalButton
     return InlineKeyboardMarkup.create(buttons.chunked(2))
@@ -181,9 +181,7 @@ class Bot(kontroll:Controller) {
 
                 dispatcher.command("slett"){
                     val chatId = ChatId.fromId(message.chat.id)
-                    val callbackQuery = update.callbackQuery
-                    val user = User(chatId, message.from?.id, message.from?.isBot, message.from?.firstName, message.from?.lastName, message.from?.username, message.from?.languageCode)
-                    val subs = control.hentSubs(user)
+                    val subs = control.hentSubs(message.from?.id)
                     bot.sendMessage(
                         chatId = chatId,
                         text = "velg sted du vil fjerne varslinger for",
@@ -212,6 +210,9 @@ class Bot(kontroll:Controller) {
                         data.startsWith("varsel") -> {
                             handleVarselCallback(data, chatId, callbackQuery)
                         }
+                        data.startsWith("Slett") -> {
+                            handleFjernCallback(data, chatId, callbackQuery)
+                        }
 
                         data == "start" -> {
                             handleBackToRegionsCallback(chatId, callbackQuery)
@@ -220,9 +221,7 @@ class Bot(kontroll:Controller) {
                         data == "exitAction" -> {
                             handleExitActionCallback(chatId, callbackQuery)
                         }
-                        data.startsWith("fjern") -> {
-                            handleFjernCallback(data, chatId, callbackQuery)
-                        }
+
                     }
                 }
             }
@@ -325,13 +324,26 @@ class Bot(kontroll:Controller) {
     private suspend fun handleFjernCallback(data: String, chatId: ChatId, callbackQuery: CallbackQuery){
         val parts = data.split("|")
         val sectionId = parts[1]
-        val user = User(chatId, callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
-
-        control.fjernSubs(user, sectionId.toLong())
-        myBot.sendMessage(                chatId = chatId,
-            text = "Abonnement fjernet",
-            replyMarkup = null
-        )
+        println("i fjern")
+        val fjernet = control.fjernSubs(callbackQuery.from.id, sectionId.toLong())
+        if (fjernet != null && fjernet){
+            myBot.sendMessage(
+                chatId = chatId,
+                text = "Abonnement fjernet",
+            )
+            myBot.editMessageReplyMarkup(
+                chatId = chatId,
+                messageId = callbackQuery.message?.messageId,
+                replyMarkup = null
+            )
+        }else {
+            myBot.sendMessage(
+                chatId = chatId,
+                text = "En feil har oppstått.",
+                replyMarkup = null
+            )
+            handleFjernCallback(data, chatId, callbackQuery)
+        }
     }
 
     private suspend fun handleBackToRegionsCallback(chatId: ChatId, callbackQuery: CallbackQuery) {

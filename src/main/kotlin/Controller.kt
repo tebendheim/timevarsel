@@ -1,3 +1,8 @@
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
 class Controller (){
     private val bot:Bot = Bot(this)
     private val veg:Vegvesen
@@ -12,44 +17,66 @@ class Controller (){
         bot.startBot()
     }
 
-    suspend fun oppdater(init:Boolean) {
+    fun start(){
+        runBlocking {
+            CoroutineScope(Dispatchers.IO).launch {
+                println("starter")
+                val newRegions: List<Region> = getRegions()
+                regioner.clear()
+                regioner.addAll(newRegions)
+                regioner.forEach { region ->
+                    val regionSections = getSections(region.id)
+                    regionSections.forEach { section ->
+                        sections.put(section.id, section)
+                        addDates(getAvailDates(section.id), section)
+                    }
+                }
+            }
+        }
+    }
+
+
+    suspend fun oppdater() {
         println("oppdaterer")
         val newRegions: List<Region> = getRegions()
         regioner.clear()
         regioner.addAll(newRegions)
+        val allSections:MutableList<Section> = mutableListOf()
 
 //        @todo: For hver region. søke opp seksjoner. og sjekke om de er like eller ulike, og deretter sjekke datoer på seksjonen
 //        @todo: Deretter Sjekke abon på secsjonen og sende melding.
 //        @todo: Deretter gå videre til neste seksjon - for så neste region osv.
 
         regioner.forEach{ region ->
-            val allSections = getSections(region.id)
-            val newSections = getNewItems(allSections, sections.values.toList())
-            newSections.forEach{section -> sections.put(section.id, section)}
-            val deletedSections = getDeletedItems(allSections, sections.values.toList())
-            deletedSections.forEach{section -> sections.remove(section.id)}
-                allSections.forEach{section ->
+            val regionSections = getSections(region.id)
+            regionSections.forEach{section ->
+                if (!sections.containsKey(section.id)){
+                    sections.put(section.id, section)
+                }
+                allSections.add(section)
                 val dates: List<String> = getAvailDates(section.id)
-                    val oldDates = sectionDates[section]
-                    val newDates = getNewItems(dates, oldDates)
-                    val deletedDates = getDeletedItems(dates, sectionDates[section])
-                    addDates(newDates, section)
-                    deleteDates(deletedDates, section)
-                    if (newDates.isNotEmpty()){
-                        if (!init) {
+                val oldDates = sectionDates[section]
+                val newDates = getNewItems(dates, oldDates)
+                val deletedDates = getDeletedItems(dates, sectionDates[section])
+                addDates(newDates, section)
+                deleteDates(deletedDates, section)
+                if (newDates.isNotEmpty()){
 //                        @todo: Send message- new dates available with all dates and section
-                            abonnenter[section.id]?.forEach { user ->
-                                bot.sendMessage(
-                                    user.chatId,
-                                    "${section.name} har nå Fått følgende nye datoer:\n ${dates.joinToString("\n")}"
-                                )
-                            }
-                            println("Section: $section har nye datoer: $newDates")
+                        abonnenter[section.id]?.forEach { user ->
+                            bot.sendMessage(
+                                user.chatId,
+                                "${section.name} har nå Fått følgende nye datoer:\n ${dates.joinToString("\n")}"
+                            )
                         }
-                    }
+                        println("Section: $section har nye datoer: $newDates")
+                }
             }
         }
+//        val newSectionIds = allSections.map { it.id }.toSet()
+//        sections.entries.removeAll { it.key in newSectionIds }
     }
+
+
     fun addDates(dates:List<String>, section: Section){
         val storedDates = sectionDates.get(section)
         if (storedDates == null){
@@ -91,20 +118,33 @@ class Controller (){
         }
     }
 
-    fun hentSubs(user: User): List<Section>{
+    fun hentSubs(userId: Long?): List<Section>{
+        println("i subs")
+        println(sections)
         val subs: MutableList<Section> =  mutableListOf()
-        abonnenter.forEach{id:Long, list:MutableList<User> ->
-
-            if (abonnenter[id]?.contains(user)==true){
-                if (sections[id] != null){
-                    subs.add(sections[id]!!)
+        abonnenter.forEach{sectionId, userList ->
+            val userExists = userList.any {user -> user.id == userId}
+            if (userExists) {
+                sections[sectionId]?.let { section ->
+                    // Add the section to subs if it exists
+                    subs.add(section)
                 }
             }
         }
         return subs
     }
-    fun fjernSubs(user: User, sectionid: Long){
 
+
+    fun fjernSubsAlle(userId: Long){
+        abonnenter.forEach{(sectionid, userList) ->
+            val removedUser = userList.removeIf{user -> user.id == userId}
+        }
+    }
+
+    fun fjernSubs(userId: Long, sectionid: Long):Boolean?{
+        val  section = abonnenter.get(sectionid)
+        val removed:Boolean? = section?.removeIf{user -> user.id == userId}
+        return removed
     }
 }
 
@@ -127,16 +167,3 @@ fun <E> getDeletedItems(newList: List<E>, oldList: List<E>?):List<E>{
 }
 
 
-fun <E> compareLists(oldList: List<E>, newList: List<E>) {
-    // Convert lists to sets for easier comparison
-    val oldSet = oldList.toSet()
-    val newSet = newList.toSet()
-
-    // Determine the items that are in the new list but not in the old list (added items)
-    val addedItems = newSet - oldSet
-    println("Added items: $addedItems")
-
-    // Determine the items that are in the old list but not in the new list (deleted items)
-    val removedItems = oldSet - newSet
-    println("Removed items: $removedItems")
-}
