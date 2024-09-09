@@ -50,6 +50,13 @@ fun createFollowUpKeyboard(options: List<Section>): InlineKeyboardMarkup {
     return InlineKeyboardMarkup.create(buttons.chunked(2)) // Adjust chunk size as needed
 }
 
+fun createSubsList(options: List<Section>): InlineKeyboardMarkup{
+    val sectionButtons = options.map {option -> InlineKeyboardButton.CallbackData(text=option.name, callbackData = "fjern|$option.id")}
+    val additionalButton = listOf( InlineKeyboardButton.CallbackData(text = "Back", callbackData = "exitAction"))
+    val buttons = sectionButtons + additionalButton
+    return InlineKeyboardMarkup.create(buttons.chunked(2))
+}
+
 class Bot(kontroll:Controller) {
     private val control = kontroll
 
@@ -70,7 +77,7 @@ class Bot(kontroll:Controller) {
             val chatId = ChatId.fromId(message.chat.id)
             val response: TelegramBotResult<Message> = bot.sendMessage(
                 chatId = chatId,
-                text = "Hei min kjære! Nå har jeg laget en bot til deg <3 OPPDATERT."
+                text = "Hei min kjære! Nå har jeg laget en bot til deg <3"
             )
 
             // Handle the response from Telegram API
@@ -162,13 +169,25 @@ class Bot(kontroll:Controller) {
                         replyMarkup = inlineKeyboardMarkup,
                     )
                 }
-                dispatcher.command("test") {
+                dispatcher.command("leggtil") {
                     val regions = control.getRegions()
                     val inlineKeyboardMarkup = createDynamicKeyboard(regions)
                     bot.sendMessage(
                         chatId = ChatId.fromId(message.chat.id),
                         text = "Velg ett område:",
                         replyMarkup = inlineKeyboardMarkup
+                    )
+                }
+
+                dispatcher.command("slett"){
+                    val chatId = ChatId.fromId(message.chat.id)
+                    val callbackQuery = update.callbackQuery
+                    val user = User(chatId, message.from?.id, message.from?.isBot, message.from?.firstName, message.from?.lastName, message.from?.username, message.from?.languageCode)
+                    val subs = control.hentSubs(user)
+                    bot.sendMessage(
+                        chatId = chatId,
+                        text = "velg sted du vil fjerne varslinger for",
+                        replyMarkup = createSubsList(subs)
                     )
                 }
 
@@ -200,6 +219,9 @@ class Bot(kontroll:Controller) {
 
                         data == "exitAction" -> {
                             handleExitActionCallback(chatId, callbackQuery)
+                        }
+                        data.startsWith("fjern") -> {
+                            handleFjernCallback(data, chatId, callbackQuery)
                         }
                     }
                 }
@@ -298,6 +320,18 @@ class Bot(kontroll:Controller) {
         } catch (e: Exception) {
             println("Error processing varsel callback: ${e.message}")
         }
+    }
+
+    private suspend fun handleFjernCallback(data: String, chatId: ChatId, callbackQuery: CallbackQuery){
+        val parts = data.split("|")
+        val sectionId = parts[1]
+        val user = User(chatId, callbackQuery.from.id,callbackQuery.from.isBot, callbackQuery.from.firstName, callbackQuery.from.lastName, callbackQuery.from.username, callbackQuery.from.languageCode)
+
+        control.fjernSubs(user, sectionId.toLong())
+        myBot.sendMessage(                chatId = chatId,
+            text = "Abonnement fjernet",
+            replyMarkup = null
+        )
     }
 
     private suspend fun handleBackToRegionsCallback(chatId: ChatId, callbackQuery: CallbackQuery) {

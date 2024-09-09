@@ -90,6 +90,22 @@ class Controller (){
             return "error"
         }
     }
+
+    fun hentSubs(user: User): List<Section>{
+        val subs: MutableList<Section> =  mutableListOf()
+        abonnenter.forEach{id:Long, list:MutableList<User> ->
+
+            if (abonnenter[id]?.contains(user)==true){
+                if (sections[id] != null){
+                    subs.add(sections[id]!!)
+                }
+            }
+        }
+        return subs
+    }
+    fun fjernSubs(user: User, sectionid: Long){
+
+    }
 }
 
 fun <E> getNewItems(newList: List<E>, oldList: List<E>?):List<E>{
@@ -109,6 +125,7 @@ fun <E> getDeletedItems(newList: List<E>, oldList: List<E>?):List<E>{
     }
     return emptyList()
 }
+
 
 fun <E> compareLists(oldList: List<E>, newList: List<E>) {
     // Convert lists to sets for easier comparison

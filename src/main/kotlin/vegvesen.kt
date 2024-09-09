@@ -114,16 +114,22 @@ class Vegvesen {
     suspend fun finnDatoer(sectionId: Long):List<String>{
         val currentDate = LocalDate.now()
         // Extract current month and year
-        val currentMonth = currentDate.monthValue
-        val currentYear = currentDate.year
 
-        // Calculate the next month and year
-        val nextMonthDate = currentDate.plusMonths(1)
-        val nextMonth = nextMonthDate.monthValue
-        val nextYear = nextMonthDate.year
-        val resm1 = getAvailDates(sectionId, month=currentMonth, year = currentYear, ::makeHttpRequest)
-        val resm2 = getAvailDates(sectionId, month=nextMonth, year = nextYear,::makeHttpRequest)
-        return resm1
 
+        // calculate the 3 month
+
+        val resm1 = getAvailDates(sectionId, month=currentDate.monthValue, year = currentDate.year, ::makeHttpRequest)
+        val resm2 = getAvailDates(sectionId, month=finnMaaned(1), year = finnAar(1),::makeHttpRequest)
+        val resm3 = getAvailDates(sectionId, month=finnMaaned(2), year=finnAar(2), ::makeHttpRequest)
+        return resm1 + resm2 + resm3
+
+    }
+    private fun finnMaaned(adder: Long) :Int{
+        val currentDate = LocalDate.now()
+        return currentDate.plusMonths(adder).monthValue
+    }
+    private fun finnAar(adder:Long):Int{
+        val currentDate = LocalDate.now()
+        return currentDate.plusMonths(adder).year
     }
 }
