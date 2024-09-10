@@ -2,38 +2,42 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class Controller (){
-    private val bot:Bot = Bot(this)
+
     private val veg:Vegvesen
     private val abonnenter:MutableMap<Long, MutableList<User>> = mutableMapOf()
     private val res: MutableMap<Section, TimeSlot> = mutableMapOf()
     private val regioner:MutableList<Region> = mutableListOf()
     private val sections: MutableMap<Long, Section> = mutableMapOf()
     private val sectionDates:MutableMap<Section, MutableList<String>> = mutableMapOf()
+    private val mutex = Mutex()
+    private val bot:Bot = Bot(this)
 
     init {
         veg  =  Vegvesen()
         bot.startBot()
     }
 
-    fun start(){
-        runBlocking {
-            CoroutineScope(Dispatchers.IO).launch {
-                println("starter")
-                val newRegions: List<Region> = getRegions()
-                regioner.clear()
-                regioner.addAll(newRegions)
-                regioner.forEach { region ->
-                    val regionSections = getSections(region.id)
-                    regionSections.forEach { section ->
-                        sections.put(section.id, section)
-                        addDates(getAvailDates(section.id), section)
-                    }
+    suspend fun start(){
+        mutex.withLock {
+            println("starter")
+            val newRegions: List<Region> = getRegions()
+            regioner.clear()
+            regioner.addAll(newRegions)
+            regioner.forEach { region ->
+                val regionSections = getSections(region.id)
+                regionSections.forEach { section ->
+                    sections.put(section.id, section)
+                    addDates(getAvailDates(section.id), section)
                 }
             }
         }
-    }
+        println("start er ferdig")
+        }
+
 
 
     suspend fun oppdater() {
@@ -100,38 +104,39 @@ class Controller (){
         val retur =  veg.finnDatoer(sectionid)
         return retur
     }
-    fun leggTilVarsel(user:User, sectionid: Long): String{
-        try {
-        if (abonnenter[sectionid] == null){
-            abonnenter.put(sectionid, mutableListOf(user) )
-            println(abonnenter)
-            return "success"
-        }
+    suspend fun leggTilVarsel(user:User, sectionid: Long): String{
+        return mutex.withLock {
+            try {
+                if (abonnenter[sectionid] == null) {
+                    abonnenter.put(sectionid, mutableListOf(user))
+                    return "success"
+                }
 
-            val users = abonnenter.get(sectionid)!!
-            if (!users.contains(user))
-            users.add(user)
-            println(abonnenter)
-            return "success"
-        }catch (e: Exception){
-            return "error"
+                val users = abonnenter.get(sectionid)!!
+                if (!users.contains(user))
+                    users.add(user)
+                println("user ${user.id} added to $sectionid")
+                "success"
+            } catch (e: Exception) {
+                "error"
+            }
         }
     }
 
-    fun hentSubs(userId: Long?): List<Section>{
-        println("i subs")
-        println(sections)
-        val subs: MutableList<Section> =  mutableListOf()
-        abonnenter.forEach{sectionId, userList ->
-            val userExists = userList.any {user -> user.id == userId}
-            if (userExists) {
-                sections[sectionId]?.let { section ->
-                    // Add the section to subs if it exists
-                    subs.add(section)
+    suspend fun hentSubs(userId: Long?): List<Section>{
+        return mutex.withLock {
+            val subs: MutableList<Section> = mutableListOf()
+            abonnenter.forEach { sectionId, userList ->
+                val userExists = userList.any { user -> user.id == userId }
+                if (userExists) {
+                    sections[sectionId]?.let { section ->
+                        // Add the section to subs if it exists
+                        subs.add(section)
+                    }
                 }
             }
+            subs
         }
-        return subs
     }
 
 
@@ -141,10 +146,16 @@ class Controller (){
         }
     }
 
-    fun fjernSubs(userId: Long, sectionid: Long):Boolean?{
-        val  section = abonnenter.get(sectionid)
-        val removed:Boolean? = section?.removeIf{user -> user.id == userId}
+    fun slettSubs(userId: Long, sectionid: Long):Boolean?{
+    try {
+        val section = abonnenter.get(sectionid)
+        val removed: Boolean? = section?.removeIf { user -> user.id == userId }
+        println("userid $userId removed from $sectionid")
         return removed
+    }catch(e:Exception){
+        println(e)
+        return false
+    }
     }
 }
 
