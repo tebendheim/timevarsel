@@ -1,15 +1,49 @@
-
-
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+import com.github.kotlintelegrambot.entities.ChatId
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.KSerializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+data class User(
+    val chatId: ChatId,
+    val id: Long?,
+    val isBot: Boolean?,
+    val firstName: String?,
+    val lastName: String? = null,
+    val username: String? = null,
+    val languageCode: String? = null
+)
+
+@Serializable
+data class Abonnent(
+    @SerialName("chatId") val chatId: Long,
+    @SerialName("userId") val userId: Long,
+    val region: MutableList<Region> = mutableListOf()
+)
+
+@Serializable
+data class Dates(
+    @SerialName("date") val date: String
+)
+
+@Serializable
+data class Region(
+    @SerialName("regionId") val id: Long,
+    @SerialName("regionName") val name: String,
+)
+
+
+@Serializable
+data class Section(
+    @SerialName("sectionId") val id: Long,
+    @SerialName("sectionName") val name: String,
+)
 
 @Serializable
 data class TimeSlot(

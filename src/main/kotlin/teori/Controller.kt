@@ -1,23 +1,26 @@
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+package teori
+
+import Bot
+import Region
+import Section
+import TimeSlot
+import User
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import makeHttpRequest
 
-class Controller (){
+class Controller (private val bot: Bot){
 
-    private val veg:Vegvesen
+    private val veg: Vegvesen
     private val abonnenter:MutableMap<Long, MutableList<User>> = mutableMapOf()
     private val res: MutableMap<Section, TimeSlot> = mutableMapOf()
     private val regioner:MutableList<Region> = mutableListOf()
     private val sections: MutableMap<Long, Section> = mutableMapOf()
     private val sectionDates:MutableMap<Section, MutableList<String>> = mutableMapOf()
     private val mutex = Mutex()
-    private val bot:Bot = Bot(this)
 
     init {
-        veg  =  Vegvesen()
+        veg  = Vegvesen()
         bot.startBot()
     }
 
@@ -46,11 +49,6 @@ class Controller (){
         regioner.clear()
         regioner.addAll(newRegions)
         val allSections:MutableList<Section> = mutableListOf()
-
-//        @todo: For hver region. søke opp seksjoner. og sjekke om de er like eller ulike, og deretter sjekke datoer på seksjonen
-//        @todo: Deretter Sjekke abon på secsjonen og sende melding.
-//        @todo: Deretter gå videre til neste seksjon - for så neste region osv.
-
         regioner.forEach{ region ->
             val regionSections = getSections(region.id)
             regionSections.forEach{section ->
@@ -76,8 +74,6 @@ class Controller (){
                 }
             }
         }
-//        val newSectionIds = allSections.map { it.id }.toSet()
-//        sections.entries.removeAll { it.key in newSectionIds }
     }
 
 
@@ -104,7 +100,7 @@ class Controller (){
         val retur =  veg.finnDatoer(sectionid)
         return retur
     }
-    suspend fun leggTilVarsel(user:User, sectionid: Long): String{
+    suspend fun leggTilVarsel(user: User, sectionid: Long): String{
         return mutex.withLock {
             try {
                 if (abonnenter[sectionid] == null) {

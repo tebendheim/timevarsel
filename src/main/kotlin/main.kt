@@ -1,20 +1,25 @@
 
 
 import kotlinx.coroutines.*
+import teori.Vegvesen as TVegvesen
+import oppkjoring.Vegvesen as OVegvesen
+import teori.Controller as TController
+import oppkjoring.Controller as OController
 
 
 fun main() {
+   val bot = Bot()
 
-    val controller: Controller = Controller()
-    val veg:Vegvesen =  Vegvesen()
+
 try{
 
     runBlocking {
         CoroutineScope(Dispatchers.IO).launch {
-            controller.start()
+            bot.startBot()
+            bot.startControll()
             while (true) {
                 delay(300_000) // 600_000 10 minutes in milliseconds
-                    controller.oppdater()
+                bot.oppdater()
             }
         }
     }

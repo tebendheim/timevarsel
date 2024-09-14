@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import teori.getDeletedItems
+import teori.getNewItems
 
 class ListUtilsTest {
 

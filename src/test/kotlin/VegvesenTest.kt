@@ -4,9 +4,9 @@
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import teori.Vegvesen
 import java.time.LocalTime
 
 class VegvesenTest {
@@ -19,7 +19,7 @@ class VegvesenTest {
 
         coEvery { mockRequestFunction(any()) } returns validJsonResponse
 
-        // Create an instance of Vegvesen
+        // Create an instance of teori.Vegvesen
         val vegvesen = Vegvesen()
 
         // Call the function under test
@@ -50,7 +50,7 @@ class VegvesenTest {
 //
 //        coEvery { mockRequestFunction(any()) } returns malformedJsonResponse
 //
-//        val vegvesen = Vegvesen()
+//        val vegvesen = teori.Vegvesen()
 //        val result = vegvesen.getAvailTimes(sectionId = 123, date = "2024-09-02", requestFunction = mockRequestFunction)
 //
 //        assertEquals(null, result)
