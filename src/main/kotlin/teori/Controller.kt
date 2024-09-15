@@ -44,25 +44,27 @@ class Controller (private val bot: Bot){
 
 
     suspend fun oppdater() {
-        println("oppdaterer")
-        val newRegions: List<Region> = getRegions()
-        regioner.clear()
-        regioner.addAll(newRegions)
-        val allSections:MutableList<Section> = mutableListOf()
-        regioner.forEach{ region ->
-            val regionSections = getSections(region.id)
-            regionSections.forEach{section ->
-                if (!sections.containsKey(section.id)){
-                    sections.put(section.id, section)
-                }
-                allSections.add(section)
-                val dates: List<String> = getAvailDates(section.id)
-                val oldDates = sectionDates[section]
-                val newDates = getNewItems(dates, oldDates)
-                val deletedDates = getDeletedItems(dates, sectionDates[section])
-                addDates(newDates, section)
-                deleteDates(deletedDates, section)
-                if (newDates.isNotEmpty()){
+        val isMapEmptyOrAllListsEmpty = abonnenter.isEmpty() || abonnenter.all { it.value.isEmpty() }
+        if (!isMapEmptyOrAllListsEmpty) {
+            println("oppdaterer")
+            val newRegions: List<Region> = getRegions()
+            regioner.clear()
+            regioner.addAll(newRegions)
+            val allSections: MutableList<Section> = mutableListOf()
+            regioner.forEach { region ->
+                val regionSections = getSections(region.id)
+                regionSections.forEach { section ->
+                    if (!sections.containsKey(section.id)) {
+                        sections.put(section.id, section)
+                    }
+                    allSections.add(section)
+                    val dates: List<String> = getAvailDates(section.id)
+                    val oldDates = sectionDates[section]
+                    val newDates = getNewItems(dates, oldDates)
+                    val deletedDates = getDeletedItems(dates, sectionDates[section])
+                    addDates(newDates, section)
+                    deleteDates(deletedDates, section)
+                    if (newDates.isNotEmpty()) {
 //                        @todo: Send message- new dates available with all dates and section
                         abonnenter[section.id]?.forEach { user ->
                             bot.sendMessage(
@@ -71,9 +73,11 @@ class Controller (private val bot: Bot){
                             )
                         }
                         println("Section: $section har nye datoer: $newDates")
+                    }
                 }
             }
         }
+        println("det er ingen abonnenter.")
     }
 
 

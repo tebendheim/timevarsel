@@ -65,9 +65,24 @@ class Bot(){
         botMode = teori
     }
 
+    //@Todo: ocontroll må uvkommenteres før oppkjøring kan brukes.
     suspend fun startControll(){
         tcontroll.start()
-        ocontroll.start()
+//        ocontroll.start()
+    }
+
+    //@Todo: ocontroll må uvkommenteres før oppkjøring kan brukes.
+    suspend fun oppdater(){
+        tcontroll.oppdater()
+//        ocontroll.oppdater()
+    }
+
+    fun startBot() {
+        myBot.startPolling()
+    }
+
+    fun stopBot() {
+        myBot.stopPolling()
     }
 
 
@@ -92,9 +107,15 @@ class Bot(){
             sendMessage(ChatId.fromId(message.chat.id), "Du ser nå på ledige teoritimer.")
         }
         dispatcher.command("oppkjoring"){
-            botMode = oppkjoring
-            sendMessage(ChatId.fromId(message.chat.id), "Du ser nå på ledige oppkjøringstimer.")
+            oppkjoringCommand(message)
         }
+    }
+
+//  @Todo denne må endres når oppkjøring er klar.
+    private fun oppkjoringCommand(message: Message){
+//            botMode = oppkjoring
+//            sendMessage(ChatId.fromId(message.chat.id), "Du ser nå på ledige oppkjøringstimer.")
+        sendMessage(ChatId.fromId(message.chat.id), "Oppgjøringsvarsling er ikke mulig ennå.")
     }
 
     private fun callbackQuerySetup(dispatcher: Dispatcher){
@@ -131,14 +152,6 @@ class Bot(){
 
     }
 
-    suspend fun start(){
-
-    }
-
-    suspend fun oppdater(){
-        tcontroll.oppdater()
-        ocontroll.oppdater()
-    }
 
 
     public final fun editMessageReplyMarkup(
@@ -170,13 +183,7 @@ class Bot(){
             myBot.sendMessage(chatId,text,parseMode,disableWebPagePreview,disableNotification,protectContent,replyToMessageId,allowSendingWithoutReply,replyMarkup,messageThreadId)
         )
     }
-    fun startBot() {
-        myBot.startPolling()
-    }
 
-    fun stopBot() {
-        myBot.stopPolling()
-    }
 
 }
 
